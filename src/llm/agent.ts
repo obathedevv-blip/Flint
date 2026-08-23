@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { chatCompletion, type ChatMessage } from "./openrouter.js";
+import { chatCompletion, type ChatMessage, type ContentPart } from "./openrouter.js";
 import { toolSpecs, runTool } from "./tools.js";
 import {
   getFacts,
@@ -15,7 +15,7 @@ import {
 import type { User } from "../memory/store.js";
 import { config } from "../config.js";
 import { extractFirstUrl } from "../utils/url.js";
-import { captureScreenshot } from "../vision/screenshot.js";
+import { captureScreenshots } from "../vision/screenshot.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PERSONALITY_PATH = path.join(__dirname, "..", "personality", "system-prompt.md");
@@ -140,11 +140,26 @@ export async function runAgentTurn(user: User, userText: string): Promise<string
   if (url) {
     const lastMessage = messages[messages.length - 1];
     try {
-      const screenshot = await captureScreenshot(url);
-      lastMessage.content = [
+      const shots = await captureScreenshots(url);
+      const toImagePart = (buf: Buffer): ContentPart => ({
+        type: "image_url",
+        image_url: { url: `data:image/png;base64,${buf.toString("base64")}` },
+      });
+
+      const content: ContentPart[] = [
         { type: "text", text: userText },
-        { type: "image_url", image_url: { url: `data:image/png;base64,${screenshot.toString("base64")}` } },
+        { type: "text", text: "Screenshot 1, right after initial page load:" },
+        toImagePart(shots.initial),
+        { type: "text", text: "Screenshot 2, ~20s later once slower content/animations had time to settle:" },
+        toImagePart(shots.settled),
       ];
+      if (shots.afterNavigation) {
+        content.push(
+          { type: "text", text: "Screenshot 3, after clicking into one of the site's nav/menu links:" },
+          toImagePart(shots.afterNavigation)
+        );
+      }
+      lastMessage.content = content;
     } catch (err) {
       console.error("Screenshot capture failed:", err);
       lastMessage.content = `${userText}\n\n[System note: the screenshot tool failed on our infrastructure, not the user's device or anything they did. Don't guess at or invent a technical reason. Just say you couldn't see the link this time, it's on your end, and ask if they want to retry later or just paste text/describe it instead.]`;

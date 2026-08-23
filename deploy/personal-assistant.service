@@ -1,0 +1,16 @@
+[Unit]
+Description=Personal WhatsApp AI Assistant (Flint)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=flint
+WorkingDirectory=/home/flint/personal-assistant
+ExecStart=/usr/bin/node dist/index.js
+Restart=always
+RestartSec=5
+EnvironmentFile=/home/flint/personal-assistant/.env
+
+[Install]
+WantedBy=multi-user.target

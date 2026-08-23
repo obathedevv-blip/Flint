@@ -40,11 +40,19 @@ export class BaileysAdapter implements WhatsAppAdapter {
 
       if (connection === "close") {
         const statusCode = (lastDisconnect?.error as Boom | undefined)?.output?.statusCode;
-        const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-        console.log(`Connection closed (status ${statusCode ?? "unknown"}).`, shouldReconnect ? "Reconnecting..." : "Logged out, delete the auth folder and re-scan to relink.");
-        if (shouldReconnect) {
-          void this.connect();
+
+        if (statusCode === DisconnectReason.loggedOut) {
+          console.log("Logged out, delete the auth folder and re-scan to relink.");
+          return;
         }
+
+        if (statusCode === DisconnectReason.connectionReplaced) {
+          console.log("Connection replaced by another active session. NOT auto-reconnecting, this usually means two copies of the bot are running at once against the same auth folder, or the account got linked elsewhere. Stop any other running instance, then restart this one.");
+          return;
+        }
+
+        console.log(`Connection closed (status ${statusCode ?? "unknown"}). Reconnecting in 3s...`);
+        setTimeout(() => void this.connect(), 3000);
       } else if (connection === "open") {
         console.log("Connected to WhatsApp.");
       }
