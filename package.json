@@ -1,0 +1,44 @@
+{
+  "name": "personal-assistant",
+  "version": "1.0.0",
+  "description": "Personal WhatsApp AI assistant",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "@ffmpeg-installer/linux-x64": "^4.1.0",
+    "@ffmpeg-installer/win32-x64": "^4.1.0",
+    "@hapi/boom": "^10.0.1",
+    "@whiskeysockets/baileys": "^7.0.0-rc14",
+    "better-sqlite3": "^13.0.3",
+    "dotenv": "^17.4.2",
+    "edge-tts-universal": "^1.4.0",
+    "node-cron": "^4.6.0",
+    "pino": "^10.3.1",
+    "playwright": "^1.62.1",
+    "qrcode-terminal": "^0.12.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/node": "^26.2.0",
+    "@types/node-cron": "^3.0.11",
+    "@types/qrcode-terminal": "^0.12.2",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2"
+  },
+  "allowScripts": {
+    "@whiskeysockets/baileys@7.0.0-rc14": true,
+    "better-sqlite3@13.0.3": true,
+    "esbuild@0.28.2": true,
+    "protobufjs@7.6.5": true,
+    "@ffmpeg-installer/linux-x64@4.1.0": true
+  }
+}
